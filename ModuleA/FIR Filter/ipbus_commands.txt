@@ -1,0 +1,36 @@
+import uhal
+import math
+import numpy as np
+import matplotlib.pyplot as plt
+
+manager = uhal.ConnectionManager("file://arty7_connection.xml")
+hw = manager.getDevice("arty7")
+
+N = 512
+
+list = []
+for i in range(N):
+	list.append( i*2 + 1 )
+
+y_input = []
+x = np.linspace(0, 6.28, N)
+
+for i in x:
+	y_input.append( int(100 + 100*np.sin(i)) )
+
+plt.plot(x, y_input)
+plt.show()
+
+hw.getNode("data_input").writeBlock(y_input)
+
+reading = hw.getNode("data_processed").readBlock(N)
+
+hw.dispatch()
+
+sine_filtered = reading.value()
+sine_filtered
+
+plt.plot(x, y_input)
+plt.plot(x, sine_filtered)
+plt.show()
+

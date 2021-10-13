@@ -1,0 +1,4 @@
+<node id="TOP">
+  <node id="data_input"   address="0x000000"  mode="block" size="0x200" description="flash registers" permission = "rw" fwinfo="endpoint;width=10" />
+  <node id="data_processed"   address="0x000200"  mode="block" size="0x200" description="flash registers" permission = "rw" fwinfo="endpoint;width=10" />
+</node>

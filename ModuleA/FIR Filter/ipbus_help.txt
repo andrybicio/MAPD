@@ -1,0 +1,80 @@
+
+First, it needs to be changed the setting in the xml file, in order to be able to access more register and have both write and read permissions (permission = "rw").
+Second, we renamed the node using "data", hence using python it'll have this specific ID (node id = "data")
+It is already done, and blocksize of the memory is 1024, we will access it sequentially starting from address="0x000000".
+
+
+#### FILE "arty7_regs.xml" #######
+<node id="TOP">
+  <node id="registers"   address="0x000000"  mode="block" size="1024"  description="flash registers" permission = "rw" fwinfo="endpoint;width=10" />
+</node>
+
+
+This following file no needs to be modified.
+
+### FILE "arty7_connection.xml" ###
+<?xml version="1.0" encoding="UTF-8"?>
+<connections>
+  <connection id="arty7" uri="ipbusudp-2.0://10.10.10.100:50001" address_table="file://arty7_regs.xml" />  
+</connections>
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@                                                                @@@
+@@@                      PYTHON SCRIPTS                            @@@
+@@@                                                                @@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Some useful scripts for the input/outputs are the following ones, keeping in mind always to run the first block of commands:
+
+ALWAYS NEEDS TO BE RUN FIRST
+
+import uhal
+manager = uhal.ConnectionManager("file://arty7_connection.xml")
+hw = manager.getDevice("arty7")
+
+
+Let moreover keep in mind that tasks are lazy, and need to be run using the "dispatch" command, otherwise they would form a queue and nothing happens.
+
+
+WRITE ONTO A SINGLE REGISTER
+
+hw.getNode("data").write(some_integer)
+hw.dispatch()
+
+READ FROM A SINGLE REGISTER
+
+read_integer = hw.getNode("data").read(some_integer)
+hw.dispatch()
+print(read_integer)
+
+WRITE/READ A VALUE IN A SINGLE REGISTER
+
+hw.getNode("data").write(some_integer)
+read_integer = hw.getNode("data").read(some_integer)
+hw.dispatch()
+print(read_integer)
+
+
+
+
+Let us focus on a larger number of registers (block)
+
+WRITE ONTO A BLOCK OF REGISTERS (3 values)
+
+hw.getNode("data").writeBlock([some_integer, another_integer, different integer])
+hw.dispatch()
+
+READ FROM A BLOCK OF REGISTERS
+
+read_block = hw.getNode("data").readBlock(number_of_registers_we_want_to_read_from)
+hw.dispatch()
+
+
+WRITE/RETRIEVE 5 VALUES FROM A BLOCK OF REGISTERS
+
+hw.getNode("data").writeBlock([ value1, value2, value3, value4, value5])
+read_block = hw.getNode("data").readBlock(5)
+hw.dispatch()
+print(read_block)
+
